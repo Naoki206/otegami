@@ -68,11 +68,14 @@ class FormController extends Controller
 
 	function replySend() {
 		$reply_id = Request::input('reply_id');
-		$destination = DB::table('posts')->where('reply_id', $reply_id)->get();
-		foreach($destination as $d) {
-			$destination_user_id = $d->user_id;
-			$destination_reply_flg = $d->reply_flg;
+		$destination_reply_flg = DB::table('posts')->where('reply_id', $reply_id)->first()->reply_flg;
+
+		if ($destination_reply_flg == 1) {
+			echo "一度返信したメッセージに再度返信することはできません。";
+			exit;
 		}
+
+		$destination_user_id = DB::table('posts')->where('reply_id', $reply_id)->first()->user_id;
 		$destination_id = User::find($destination_user_id)->twitter_id;
 		$text = Request::input('text');
 		$user_id = Auth::user()->id;
@@ -93,11 +96,6 @@ class FormController extends Controller
 			config('twitter.access_token_secret')
 		);
 
-		if ($destination_reply_flg == 1) {
-			echo "一度返信したメッセージに再度返信することはできません。";
-			exit;
-		}
-
 		$connection->post('direct_messages/events/new', [
 			'event' => [
 				'type' => 'message_create',
@@ -112,28 +110,9 @@ class FormController extends Controller
 			]
 		], true);
 
-		DB::table('posts')
-			->where('reply_id', $reply_id) 
-			->update([
-				'reply_flg' => 1
-			]);
+		DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
 
 		return view('sent');
 	}
 
-	function join() {
-		$user = User::find(1);
-		$posts = $user->posts;
-
-		$posts = Post::all();
-
-		foreach ($posts as $post) {
-			echo $post . "<br/>";
-		}
-
-		foreach ($posts as $post) {
-			echo $post->user->name . "<br/>";
-		}
-
-	}
 }

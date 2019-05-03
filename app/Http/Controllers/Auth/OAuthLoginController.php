@@ -22,8 +22,9 @@ class OAuthLoginController extends Controller
 	public function handleProviderCallback($social) {
 		try {
 			$userSocial = Socialite::driver($social)->user();
+			$twitter_id = $userSocial->id;
 
-			$user = DB::table('users')->where(['email' => $userSocial->getEmail()])->first();
+			$user = DB::table('users')->where('twitter_id', $twitter_id)->first();
 
 			if(is_null($user)) {
 				if (is_null($userSocial->getNickname())) {

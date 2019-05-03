@@ -31,4 +31,3 @@ Route::post('/form/confilm', 'FormController@messageSend')->name('formConfilm');
 Route::get('/replyForm/{reply_id?}', 'FormController@returnReplyForm')->name('Replyform');
 Route::post('/replyForm/confilm/', 'FormController@replySend')->name('ReplyformConfilm');
 
-Route::get('/confilm', 'FormController@join');
