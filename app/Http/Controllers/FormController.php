@@ -21,6 +21,14 @@ class FormController extends Controller
 
 	function messageSend() {
 		$text = Request::input('text');
+		$ng_words_list = DB::table('ngwords')->get();
+		foreach ($ng_words_list as $ng_word) {
+		 	$ng_word = $ng_word->ng_word;
+			if(stripos($text, $ng_word) !== false) {
+				echo "適切でない単語が含まれるため、送信できません。やり直してください";
+				return view('form');
+			}
+		}
 		$user_id = Auth::user()->id;
 		$uniq_id = uniqid();
 
@@ -75,9 +83,17 @@ class FormController extends Controller
 			exit;
 		}
 
+		$text = Request::input('text');
+		$ng_words_list = DB::table('ngwords')->get();
+		foreach ($ng_words_list as $ng_word) {
+		 	$ng_word = $ng_word->ng_word;
+			if(stripos($text, $ng_word) !== false) {
+				echo "適切でない単語が含まれるため、送信できません。やり直してください";
+				return  view('replyForm', compact('reply_id'));
+			}
+		}
 		$destination_user_id = DB::table('posts')->where('reply_id', $reply_id)->first()->user_id;
 		$destination_id = User::find($destination_user_id)->twitter_id;
-		$text = Request::input('text');
 		$user_id = Auth::user()->id;
 		$uniq_id = uniqid();
 
@@ -113,6 +129,13 @@ class FormController extends Controller
 		DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
 
 		return view('sent');
+	}
+
+	function ng() {
+		$ng_words_list = DB::table('ngwords')->get();
+		foreach ($ng_words_list as $ng_word) {
+		echo $ng_word->ng_word;
+		}
 	}
 
 }
