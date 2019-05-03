@@ -16,6 +16,9 @@ use Abraham\TwitterOAuth\TwitterOAuth;
 class OAuthLoginController extends Controller
 {
 	public function socialLogin($social) {
+		if (Auth::check()) {
+			return  view('form', compact('reply_id'));
+		}
 		return Socialite::driver($social)->redirect();
 	}
 
@@ -56,11 +59,16 @@ class OAuthLoginController extends Controller
 
 			$userd->save();
 			auth()->login($userd, true);
-			return redirect()->to('/');
+			return redirect()->to('/form');
 
 		} catch (Exception $e) {
 			return redirect()->route('/')->withErrors('ユーザー情報の取得に失敗しました。');
 		}
+	}
+
+	public function logout() {
+		Auth::logout();
+		return redirect()->to('/');
 	}
 
 	public function getTimeline(Request $request) {

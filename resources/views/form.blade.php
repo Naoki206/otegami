@@ -1,3 +1,5 @@
+<h3>お手紙運ぶマン</h3>
+<h5>お手紙運ぶマン登録者からランダムなユーザーにメッセージを送信</h5>
 <form action="{{ route('formConfilm') }}" method="post">
 {{ csrf_field() }}
 
@@ -5,3 +7,4 @@
 
 <input type="submit" value="送信">
 </form>
+<a href="{{ route('logout') }}">ログアウト</a>
