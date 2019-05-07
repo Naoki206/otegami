@@ -26,8 +26,7 @@ class FormController extends Controller
 		foreach ($ng_words_list as $ng_word) {
 		 	$ng_word = $ng_word->ng_word;
 			if(stripos($text, $ng_word) !== false) {
-				echo "適切でない単語が含まれるため、送信できません。やり直してください";
-				return view('form');
+				return redirect('/form')->with('flash_message', '適切でない単語が含まれるため、送信できません。やり直してください。');
 			}
 		}
 		$user_id = Auth::user()->id;
@@ -35,8 +34,9 @@ class FormController extends Controller
 
 		$randomUserId = DB::table('users')->inRandomOrder()->where('id', '<>', $user_id)->first()->twitter_id;
 
-		$twitter_access_token = DB::table('tokens')->get()->first()->twitter_access_token;
-		$twitter_access_token_secret = DB::table('tokens')->get()->first()->twitter_access_token_secret;
+		$token = DB::table('tokens')->get()->first();
+		$twitter_access_token = $token->twitter_access_token;
+		$twitter_access_token_secret = $token->twitter_access_token_secret;
 
 		$connection = new TwitterOAuth(
 			config('twitter.consumer_key'),
@@ -60,9 +60,8 @@ class FormController extends Controller
 		], true);
 
 		if (isset($message->errors)) {
-			echo "Failed! Try it again!";
 			Log::info($message->errors[0]->message);
-			return view('form');
+			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
 		$post = Post::create([
@@ -86,11 +85,14 @@ class FormController extends Controller
 
 	function replySend() {
 		$reply_id = Request::input('reply_id');
+		$destination_record = DB::table('posts')->where('reply_id', $reply_id)->exists();
+		if ($destination_record == false) { 
+			return redirect('/replyForm/$reply_id=' . $reply_id)->with('flash_message', '無効なURLです。');
+		}
 		$destination_reply_flg = DB::table('posts')->where('reply_id', $reply_id)->first()->reply_flg;
 
 		if ($destination_reply_flg == 1) {
-			echo "一度返信したメッセージに再度返信することはできません。";
-			return  view('replyForm', compact('reply_id'));
+			return redirect('/replyForm/$reply_id=' . $reply_id)->with('flash_message', '一度返信したメッセージに返信することはできません。');
 		}
 
 		$text = Request::input('text');
@@ -98,8 +100,7 @@ class FormController extends Controller
 		foreach ($ng_words_list as $ng_word) {
 		 	$ng_word = $ng_word->ng_word;
 			if(stripos($text, $ng_word) !== false) {
-				echo "適切でない単語が含まれるため、送信できません。やり直してください";
-				return  view('replyForm', compact('reply_id'));
+				return redirect('/replyForm/?reply_id=' . $reply_id)->with('flash_message', '適切でない単語が含まれるため、送信できません。やり直してください。');
 			}
 		}
 		$destination_user_id = DB::table('posts')->where('reply_id', $reply_id)->first()->user_id;
@@ -107,8 +108,9 @@ class FormController extends Controller
 		$user_id = Auth::user()->id;
 		$uniq_id = uniqid();
 
-		$twitter_access_token = DB::table('tokens')->get()->first()->twitter_access_token;
-		$twitter_access_token_secret = DB::table('tokens')->get()->first()->twitter_access_token_secret;
+		$token = DB::table('tokens')->get()->first();
+		$twitter_access_token = $token->twitter_access_token;
+		$twitter_access_token_secret = $token->twitter_access_token_secret;
 
 		$connection = new TwitterOAuth(
 			config('twitter.consumer_key'),
@@ -132,9 +134,8 @@ class FormController extends Controller
 		], true);
 
 		if (isset($message->errors)) {
-			echo "Failed! Try it again!";
 			Log::info($message->errors[0]->message);
-			return view('form');
+			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
 		$post = Post::create([

@@ -1,3 +1,6 @@
+@if (session('flash_message'))
+{{ session('flash_message') }}
+@endif
 <form action="{{ route('ReplyformConfilm') }}" method="post">
 {{ csrf_field() }}
 

@@ -27,8 +27,9 @@ Route::get('/index1', 'Auth\OAuthLoginController@GetTimeLine');
 Route::get('/index2', 'Auth\OAuthLoginController@UserInfo');
 
 Route::get('/form', 'FormController@returnForm')->name('form');
-Route::post('/form/confilm', 'FormController@messageSend')->name('formConfilm');
+Route::post('/form', 'FormController@messageSend')->name('formConfilm');
 
 Route::get('/replyForm/{reply_id?}', 'FormController@returnReplyForm')->name('Replyform');
-Route::post('/replyForm/confilm/', 'FormController@replySend')->name('ReplyformConfilm');
+Route::post('/replyForm', 'FormController@replySend')->name('ReplyformConfilm');
+
 
