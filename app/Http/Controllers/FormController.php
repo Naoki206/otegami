@@ -9,6 +9,7 @@ use App\User;
 use App\Post;
 use Auth;
 use Socialite;
+use Illuminate\Support\Facades\Log;
 
 class FormController extends Controller
 {
@@ -32,24 +33,19 @@ class FormController extends Controller
 		$user_id = Auth::user()->id;
 		$uniq_id = uniqid();
 
-		$post = Post::create([
-			'text' => $text,
-			'user_id' => $user_id,
-			'reply_id' => $uniq_id 
-		]);
+		$randomUserId = DB::table('users')->inRandomOrder()->where('id', '<>', $user_id)->first()->twitter_id;
 
-		$post->save();
+		$twitter_access_token = DB::table('tokens')->get()->first()->twitter_access_token;
+		$twitter_access_token_secret = DB::table('tokens')->get()->first()->twitter_access_token_secret;
 
 		$connection = new TwitterOAuth(
 			config('twitter.consumer_key'),
 			config('twitter.consumer_secret'),
-			config('twitter.access_token'),
-			config('twitter.access_token_secret')
+			$twitter_access_token,
+			$twitter_access_token_secret
 		);
 
-		$randomUserId = DB::table('users')->inRandomOrder()->where('id', '<>', $user_id)->first()->twitter_id;
-
-		$connection->post('direct_messages/events/new', [
+		$message = $connection->post('direct_messages/events/new', [
 			'event' => [
 				'type' => 'message_create',
 				'message_create' => [
@@ -62,6 +58,20 @@ class FormController extends Controller
 				]
 			]
 		], true);
+
+		if (isset($message->errors)) {
+			echo "Failed! Try it again!";
+			Log::info($message->errors[0]->message);
+			return view('form');
+		};
+
+		$post = Post::create([
+			'text' => $text,
+			'user_id' => $user_id,
+			'reply_id' => $uniq_id 
+		]);
+
+		$post->save();
 
 		return view('sent');
 	}
@@ -80,7 +90,7 @@ class FormController extends Controller
 
 		if ($destination_reply_flg == 1) {
 			echo "一度返信したメッセージに再度返信することはできません。";
-			exit;
+			return  view('replyForm', compact('reply_id'));
 		}
 
 		$text = Request::input('text');
@@ -97,22 +107,17 @@ class FormController extends Controller
 		$user_id = Auth::user()->id;
 		$uniq_id = uniqid();
 
-		$post = Post::create([
-			'text' => $text,
-			'user_id' => $user_id,
-			'reply_id' => $uniq_id 
-		]);
-
-		$post->save();
+		$twitter_access_token = DB::table('tokens')->get()->first()->twitter_access_token;
+		$twitter_access_token_secret = DB::table('tokens')->get()->first()->twitter_access_token_secret;
 
 		$connection = new TwitterOAuth(
 			config('twitter.consumer_key'),
 			config('twitter.consumer_secret'),
-			config('twitter.access_token'),
-			config('twitter.access_token_secret')
+			$twitter_access_token,
+			$twitter_access_token_secret
 		);
 
-		$connection->post('direct_messages/events/new', [
+		$message = $connection->post('direct_messages/events/new', [
 			'event' => [
 				'type' => 'message_create',
 				'message_create' => [
@@ -126,16 +131,24 @@ class FormController extends Controller
 			]
 		], true);
 
+		if (isset($message->errors)) {
+			echo "Failed! Try it again!";
+			Log::info($message->errors[0]->message);
+			return view('form');
+		};
+
+		$post = Post::create([
+			'text' => $text,
+			'user_id' => $user_id,
+			'reply_id' => $uniq_id 
+		]);
+
+		$post->save();
+
+
 		DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
 
 		return view('sent');
-	}
-
-	function ng() {
-		$ng_words_list = DB::table('ngwords')->get();
-		foreach ($ng_words_list as $ng_word) {
-		echo $ng_word->ng_word;
-		}
 	}
 
 }
