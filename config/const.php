@@ -1,2 +1,2 @@
 <?php
-return ['number' => 100];
+return ['numberOfCharacter' => 100];

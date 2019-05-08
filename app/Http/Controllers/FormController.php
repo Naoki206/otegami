@@ -26,7 +26,7 @@ class FormController extends Controller
 	}
 
 	function messageSend(Request $request) {
-		$validateNum = config('const.number');
+		$validateNum = config('const.numberOfCharacter');
 		$validatedData = $request->validate([
 		'text' => 'required|max:' . $validateNum,
 		]);
@@ -93,7 +93,7 @@ class FormController extends Controller
 	}
 
 	function replySend(Request $request) {
-		$validateNum = config('const.number');
+		$validateNum = config('const.numberOfCharacter');
 		$validatedData = $request->validate([
 		'text' => 'required|max:' . $validateNum,
 		]);
