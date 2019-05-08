@@ -1,3 +1,4 @@
+{{ $errors->first('text') }}
 @if (session('flash_message'))
 {{ session('flash_message') }}
 @endif

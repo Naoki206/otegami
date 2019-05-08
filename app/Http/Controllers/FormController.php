@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Request;
+use Validator;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+//use Request
 use Abraham\TwitterOAuth\TwitterOAuth;
 use DB;
 use App\User;
@@ -20,8 +25,12 @@ class FormController extends Controller
 		return view('welcome');
 	}
 
-	function messageSend() {
-		$text = Request::input('text');
+	function messageSend(Request $request) {
+		$validateNum = config('const.numberOfCharacter');
+		$validatedData = $request->validate([
+		'text' => 'required|max:' . $validateNum,
+		]);
+		$text = Input::get('text');
 		$ng_words_list = DB::table('ngwords')->get();
 		foreach ($ng_words_list as $ng_word) {
 		 	$ng_word = $ng_word->ng_word;
@@ -76,15 +85,19 @@ class FormController extends Controller
 	}
 
 	function returnReplyForm() {
-		$reply_id = Request::input('reply_id');
+		$reply_id = Input::get('reply_id');
 		if (Auth::check()) {
 			return  view('replyForm', compact('reply_id'));
 		}
 		return view('welcome');
 	}
 
-	function replySend() {
-		$reply_id = Request::input('reply_id');
+	function replySend(Request $request) {
+		$validateNum = config('const.numberOfCharacter');
+		$validatedData = $request->validate([
+		'text' => 'required|max:' . $validateNum,
+		]);
+		$reply_id = Input::get('reply_id');
 		$destination_record = DB::table('posts')->where('reply_id', $reply_id)->exists();
 		if ($destination_record == false) { 
 			return redirect('/replyForm/$reply_id=' . $reply_id)->with('flash_message', '無効なURLです。');
@@ -95,7 +108,7 @@ class FormController extends Controller
 			return redirect('/replyForm/$reply_id=' . $reply_id)->with('flash_message', '一度返信したメッセージに返信することはできません。');
 		}
 
-		$text = Request::input('text');
+		$text = Input::get('text');
 		$ng_words_list = DB::table('ngwords')->get();
 		foreach ($ng_words_list as $ng_word) {
 		 	$ng_word = $ng_word->ng_word;
