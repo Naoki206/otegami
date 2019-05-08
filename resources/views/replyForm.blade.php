@@ -18,6 +18,7 @@
 <th>内容</th>
 <th>日時</th>
 </tr>
+@if (isset($posts))
 @foreach ($posts as $post)
 <tr>
 <td>{{ $post->text }}</td>
@@ -27,3 +28,4 @@
 </table>
 <br/>
 {{ $posts->links() }}
+@endif
