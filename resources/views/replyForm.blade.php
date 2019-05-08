@@ -1,3 +1,4 @@
+<h3>お手紙運ぶマン返信フォーム</h3>
 {{ $errors->first('text') }}
 @if (session('flash_message'))
 {{ session('flash_message') }}
@@ -11,3 +12,18 @@
 
 <input type="submit" value="送信">
 </form>
+<h5>あなたが過去に送信した内容一覧</h5>
+<table>
+<tr>
+<th>内容</th>
+<th>日時</th>
+</tr>
+@foreach ($posts as $post)
+<tr>
+<td>{{ $post->text }}</td>
+<td>{{ $post->created_at }}</td>
+</tr>
+@endforeach
+</table>
+<br/>
+{{ $posts->links() }}
