@@ -1,5 +1,6 @@
 <h3>お手紙運ぶマン</h3>
 <h5>お手紙運ぶマン登録者からランダムなユーザーにメッセージを送信</h5>
+{{ $errors->first('text') }}
 @if (session('flash_message'))
 {{ session('flash_message') }}
 @endif
