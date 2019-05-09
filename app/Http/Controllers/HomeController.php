@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Auth;
+use DB;
 
 class HomeController extends Controller
 {
@@ -25,7 +26,9 @@ class HomeController extends Controller
     public function index()
     {
 		if (Auth::check()) {
-        	return view('form');
+			$user_id = Auth::user()->id;
+			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
+			return view('form', compact('posts')); 
 		}
         return view('welcome');
     }

@@ -21,12 +21,8 @@ class FormController extends Controller
 	function returnForm() {
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
-			if (DB::table('posts')->where('user_id', $user_id)->exists()) {
-				$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
-				return view('form', compact('posts'));
-			} else {
-				return view('form');
-			}
+			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
+			return view('form', compact('posts'));
 		}
 		return view('welcome');
 	}
@@ -94,13 +90,8 @@ class FormController extends Controller
 		$reply_id = Input::get('reply_id');
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
-			if (DB::table('posts')->where('user_id', $user_id)->exists()) {
-				$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
-				$posts->withPath('replyForm?reply_id=' . $reply_id);
-				return view('replyForm', compact('posts', 'reply_id'));
-			} else {
-				return view('replyForm', compact('reply_id'));
-			}
+			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
+			return view('replyForm', compact('posts', 'reply_id'));
 		}
 		return view('welcome');
 	}
@@ -171,7 +162,6 @@ class FormController extends Controller
 		]);
 
 		$post->save();
-
 
 		DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
 
