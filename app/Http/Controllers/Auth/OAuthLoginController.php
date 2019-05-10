@@ -59,7 +59,8 @@ class OAuthLoginController extends Controller
 
 			$userd->save();
 			auth()->login($userd, true);
-			return redirect()->to('/form');
+			//return redirect()->to('/form');
+			return redirect()->route('form');
 
 		} catch (Exception $e) {
 			return redirect()->route('/')->withErrors('ユーザー情報の取得に失敗しました。');

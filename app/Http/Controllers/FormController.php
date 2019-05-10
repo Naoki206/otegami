@@ -20,7 +20,9 @@ class FormController extends Controller
 {
 	function returnForm() {
 		if (Auth::check()) {
-			return  view('form');
+			$user_id = Auth::user()->id;
+			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
+			return view('form', compact('posts'));
 		}
 		return view('welcome');
 	}
@@ -87,7 +89,9 @@ class FormController extends Controller
 	function returnReplyForm() {
 		$reply_id = Input::get('reply_id');
 		if (Auth::check()) {
-			return  view('replyForm', compact('reply_id'));
+			$user_id = Auth::user()->id;
+			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
+			return view('replyForm', compact('posts', 'reply_id'));
 		}
 		return view('welcome');
 	}
@@ -158,7 +162,6 @@ class FormController extends Controller
 		]);
 
 		$post->save();
-
 
 		DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
 
