@@ -59,7 +59,6 @@ class OAuthLoginController extends Controller
 
 			$userd->save();
 			auth()->login($userd, true);
-			//return redirect()->to('/form');
 			return redirect()->route('form');
 
 		} catch (Exception $e) {
