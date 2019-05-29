@@ -1,5 +1,9 @@
-<h3>お手紙運ぶマン返信フォーム</h3>
+<h2>お手紙運ぶマン返信フォーム</h2>
+<h4>メッセージ送り主に返信しよう!</h4>
 {{ $errors->first('text') }}
+<p>受け取ったメッセージ</p>
+<p>「{{ $received_message }}」</p>
+<h4>返信</h4>
 @if (session('flash_message'))
 {{ session('flash_message') }}
 @endif
