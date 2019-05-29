@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
 			$table->tinyInteger('admin_flg')->default(0);
 			$table->softDeletes();
 			$table->string('twitter_name')->nullable();
-			$table->string('twitter_id', 191)->nullable()->unique()->index();
+			$table->string('twitter_id', 191)->nullable();
 			$table->string('access_token')->nullable();
 			$table->string('access_token_secret')->nullable();
 			$table->rememberToken();
