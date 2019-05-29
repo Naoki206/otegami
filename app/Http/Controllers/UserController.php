@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Input;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Abraham\TwitterOAuth\TwitterOAuth;
-use DB;
 use App\User;
-use App\Post;
 use Auth;
-use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
