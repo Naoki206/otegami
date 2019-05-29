@@ -32,16 +32,15 @@ Route::post('/form', 'FormController@messageSend')->name('formConfilm');
 Route::get('/replyForm/{reply_id}', 'FormController@returnReplyForm')->name('Replyform');
 Route::post('/replyForm', 'FormController@replySend')->name('ReplyformConfilm');
 
-Route::get('/ng_words', 'AdminController@show_ng_list')->name('ng_words');
-Route::get('/ng_words{id}', 'AdminController@delete_ng_word')->name('delete_ng_word');
-
-Route::get('/add_ng_word', 'AdminController@show_add_form')->name('add_ng_word_form');
-Route::post('/add_ng', 'AdminController@add_ng_word')->name('add_ng_word');
-
 Route::get('/confilm_unsubscribe', 'UserController@confilmUnsubscribe')->name('confilm_unsubscribe');
 Route::get('/unsubscribe', 'UserController@unsubscribe')->name('unsubscribe');
 
 Route::get('/terms', 'HomeController@terms')->name('terms');
 
+Route::get('/admin', 'AdminController@index')->name('admin_index');
+Route::get('/ng_words', 'AdminController@show_ng_list')->name('ng_words');
+Route::get('/ng_words{id}', 'AdminController@delete_ng_word')->name('delete_ng_word');
+Route::get('/add_ng_word', 'AdminController@show_add_form')->name('add_ng_word_form');
+Route::post('/add_ng', 'AdminController@add_ng_word')->name('add_ng_word');
 Route::get('/ng_messages', 'AdminController@ng_messages')->name('ng_messages');
 Route::get('/ng_messages/{id}', 'AdminController@send_ng_messages')->name('send_ng_messages');
