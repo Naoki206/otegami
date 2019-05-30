@@ -23,9 +23,6 @@ Route::get('/logout', 'Auth\OAuthLoginController@logout')->name('logout');
 Route::get('/login/{social}', 'Auth\OAuthLoginController@socialLogin')->where('social', 'twitter');
 Route::get('/login/{social}/callback', 'Auth\OAuthLoginController@handleProviderCallback')->where('social', 'twitter');
 
-Route::get('/index1', 'Auth\OAuthLoginController@GetTimeLine');
-Route::get('/index2', 'Auth\OAuthLoginController@UserInfo');
-
 Route::get('/form', 'FormController@returnForm')->name('form');
 Route::post('/form', 'FormController@messageSend')->name('formConfilm');
 

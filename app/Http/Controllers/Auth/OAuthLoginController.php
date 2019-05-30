@@ -71,28 +71,4 @@ class OAuthLoginController extends Controller
 		return redirect()->to('/');
 	}
 
-	public function getTimeline(Request $request) {
-		$user = User::find(Auth::user()->user_id);
-		$twitter = new TwitterOAuth(
-			config('twitter.consumer_key'),
-			config('twitter.consumer_secret')
-		);
-		 $timeline = $twitter->get('statuses/user_timeline', array(
-		 	'user_id' => Auth::User()->twitter_id,
-		 ));
-		 dd($timeline);
-	}
-
-	public function UserInfo(Request $request) {
-		$twitter_config = config('twitter');
-		$twitter = new TwitterOAuth(
-			config('twitter.consumer_key'),
-			config('twitter.consumer_secret'),
-			$twitter_config["access_token"],
-			$twitter_config["access_token_secret"]
-		);
-		$twitter_user_info = $twitter->get('account/verify_credentials');
-		dd($twitter_user_info);
-	}
-
 }
