@@ -27,7 +27,7 @@ class OAuthLoginController extends Controller
 			$userSocial = Socialite::driver($social)->user();
 			$twitter_id = $userSocial->id;
 
-			$user = DB::table('users')->where('twitter_id', $twitter_id)->first();
+			$user = DB::table('users')->where('twitter_id', $twitter_id)->where('deleted_at', NULL)->first();
 
 			if(is_null($user)) {
 				if (is_null($userSocial->getNickname())) {
@@ -59,7 +59,6 @@ class OAuthLoginController extends Controller
 
 			$userd->save();
 			auth()->login($userd, true);
-			//return redirect()->to('/form');
 			return redirect()->route('form');
 
 		} catch (Exception $e) {
@@ -70,30 +69,6 @@ class OAuthLoginController extends Controller
 	public function logout() {
 		Auth::logout();
 		return redirect()->to('/');
-	}
-
-	public function getTimeline(Request $request) {
-		$user = User::find(Auth::user()->user_id);
-		$twitter = new TwitterOAuth(
-			config('twitter.consumer_key'),
-			config('twitter.consumer_secret')
-		);
-		 $timeline = $twitter->get('statuses/user_timeline', array(
-		 	'user_id' => Auth::User()->twitter_id,
-		 ));
-		 dd($timeline);
-	}
-
-	public function UserInfo(Request $request) {
-		$twitter_config = config('twitter');
-		$twitter = new TwitterOAuth(
-			config('twitter.consumer_key'),
-			config('twitter.consumer_secret'),
-			$twitter_config["access_token"],
-			$twitter_config["access_token_secret"]
-		);
-		$twitter_user_info = $twitter->get('account/verify_credentials');
-		dd($twitter_user_info);
 	}
 
 }
