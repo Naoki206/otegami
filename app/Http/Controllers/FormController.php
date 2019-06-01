@@ -80,10 +80,13 @@ class FormController extends Controller
 			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
+		$reciever_id  = DB::table('users')->where('twitter_id',$randomUserId)->first()->id;
+
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
-			'reply_id' => $uniq_id 
+			'reply_id' => $uniq_id, 
+			'destination_id' => $reciever_id,
 		]);
 
 		$post->save();
@@ -95,7 +98,8 @@ class FormController extends Controller
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
 			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
-			$received_message = DB::table('posts')->where('reply_id', $reply_id)->get()[0]->text;
+			$received_message = DB::table('posts')->where('reply_id', $reply_id)->first()->text;
+
 			return view('replyForm', compact('posts', 'reply_id', 'received_message'));
 		}
 		return view('welcome');
@@ -170,10 +174,13 @@ class FormController extends Controller
 			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
+		$reciever_id  = DB::table('users')->where('twitter_id',$destination_id)->first()->id;
+
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
-			'reply_id' => $uniq_id 
+			'reply_id' => $uniq_id,
+			'destination_id' => $reciever_id,
 		]);
 
 		$post->save();
