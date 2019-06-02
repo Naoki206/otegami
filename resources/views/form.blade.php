@@ -11,7 +11,7 @@
 
 <input type="submit" value="送信">
 </form>
-<a href="{{ route('logout') }}">ログアウト</a>
+<a href="{{ route('logout') }}" onclick="return confirm('ログアウトします。よろしいですか?');">ログアウト</a>
 <br/>
 <a href="{{ route('confilm_unsubscribe') }}">退会</a>
 <br/>
