@@ -28,20 +28,21 @@ class FormController extends Controller
 	}
 
 	function messageSend(Request $request) {
-		$validateNum = config('const.numberOfCharacter');
-		$validatedData = $request->validate([
-			'text' => 'required|max:' . $validateNum,
+		$validate_num = config('const.numberOfCharacter');
+		$validated_data = $request->validate([
+			'text' => 'required|max:' . $validate_num,
 		]);
 		$text = Input::get('text');
 		$ng_words_list = DB::table('ngwords')->get();
 		$user_id = Auth::user()->id;
-		$randomUserId = DB::table('users')->inRandomOrder()->where('id', '<>', $user_id)->first()->twitter_id;
+		$random_user_record = DB::table('users')->inRandomOrder()->where('id', '<>', $user_id)->first();
+		$random_user_id = $random_user_record->twitter_id;
 		foreach ($ng_words_list as $ng_word) {
 		 	$ng_word = $ng_word->ng_word;
 			if(stripos($text, $ng_word) !== false) {
 				DB::table('ng_messages')->insert([
 				    'message' => $text,
-					'destination_twitter_id' => $randomUserId,
+					'destination_twitter_id' => $random_user_id,
 					'user_id' => $user_id
 				]);
 				return redirect('/form')->with('flash_message', 'あなたが送信しようとしたメッセージには適切でない単語が含まれるため、送信    には管理側のチェックが必要になります。送信されるまで時間を要することがありますので、先ほどとは異なるメッセージを再送信することをおすすめします。');
@@ -66,7 +67,7 @@ class FormController extends Controller
 				'type' => 'message_create',
 				'message_create' => [
 					'target' => [
-						'recipient_id' => $randomUserId  
+						'recipient_id' => $random_user_id  
 					],
 					'message_data' => [
 						'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id]) 
@@ -80,7 +81,7 @@ class FormController extends Controller
 			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
-		$reciever_id  = DB::table('users')->where('twitter_id',$randomUserId)->first()->id;
+		$reciever_id  = $random_user_record->id;
 
 		$post = Post::create([
 			'text' => $text,
@@ -97,8 +98,10 @@ class FormController extends Controller
 	function returnReplyForm($reply_id) {
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
-			$posts = DB::table('posts')->where('user_id', $user_id)->paginate(10);
-			$received_message = DB::table('posts')->where('reply_id', $reply_id)->first()->text;
+			$destination_record = DB::table('posts')->where('reply_id', $reply_id)->first();
+			$destination_id = $destination_record->user_id;
+			$posts = DB::table('posts')->where('user_id', $user_id)->where('destination_id', $destination_id)->paginate(10);
+			$received_message = $destination_record->text;
 
 			return view('replyForm', compact('posts', 'reply_id', 'received_message'));
 		}
@@ -106,9 +109,9 @@ class FormController extends Controller
 	}
 
 	function replySend(Request $request) {
-		$validateNum = config('const.numberOfCharacter');
-		$validatedData = $request->validate([
-		'text' => 'required|max:' . $validateNum,
+		$validate_num = config('const.numberOfCharacter');
+		$validated_data = $request->validate([
+		'text' => 'required|max:' . $validate_num,
 		]);
 		$reply_id = Input::get('reply_id');
 		$destination_record = DB::table('posts')->where('reply_id', $reply_id)->exists();
