@@ -19,6 +19,7 @@ class CreatePostsTable extends Migration
 			$table->foreign('user_id')->references('id')->on('users');
 			$table->string('text');
 			$table->string('reply_id');
+			$table->integer('from_post_id')->nullable();
 			$table->tinyInteger('reply_flg')->nullable();
 			$table->integer('destination_id')->nullable();
 			$table->softDeletes();
