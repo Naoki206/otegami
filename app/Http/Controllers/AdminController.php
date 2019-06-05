@@ -120,11 +120,13 @@ class AdminController extends Controller
 			};
 
 			 DB::table('ng_messages')->where('id', $id)->delete();
+			 $reciever_id = User::where('twitter_id', $destination_id)->first()->id;
 
 			$post = Post::create([
 				'text' => $text,
 				'user_id' => $sender_id,
-				'reply_id' => $uniq_id 
+				'reply_id' => $uniq_id, 
+				'destination_id' => $reciever_id,
 			]);
 
 			if ($message_data->reply_id) {

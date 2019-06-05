@@ -20,7 +20,7 @@ class CreatePostsTable extends Migration
 			$table->string('text');
 			$table->string('reply_id');
 			$table->tinyInteger('reply_flg')->nullable();
-			$table->integer('destination_id')->nullable();;
+			$table->integer('destination_id')->nullable();
 			$table->softDeletes();
 			$table->timestamps();
         });
