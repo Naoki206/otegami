@@ -76,7 +76,8 @@ class AdminController extends Controller
 
 			if ($message_data->reply_id) {
 				$reply_id = $message_data->reply_id;
-				$destination_reply_flg = DB::table('posts')->where('reply_id', $reply_id)->first()->reply_flg;
+				$destination_data = DB::table('posts')->where('reply_id', $reply_id)->first();
+				$destination_reply_flg = $destination_data->reply_flg;
 				if ($destination_reply_flg == 1) {
 					DB::table('ng_messages')->where('id', $id)->delete();
 					return redirect()->route('ng_messages')->with('flash_message', 'すでにこのメッセージとは異なる返信をユーザーはしています。このメッセージはテーブルから削除しておきます。');
@@ -122,16 +123,28 @@ class AdminController extends Controller
 			 DB::table('ng_messages')->where('id', $id)->delete();
 			 $reciever_id = User::where('twitter_id', $destination_id)->first()->id;
 
+			if ($message_data->reply_id) {
+				$destination_message_id = $destination_data->id;
+
+				$post = Post::create([
+					'text' => $text,
+					'user_id' => $sender_id,
+					'reply_id' => $uniq_id, 
+					'destination_id' => $reciever_id,
+					'from_post_id' => $destination_message_id,
+				]);
+
+				DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
+
+				return redirect()->route('ng_messages')->with('flash_message', '送信しました。');
+			}
+
 			$post = Post::create([
 				'text' => $text,
 				'user_id' => $sender_id,
 				'reply_id' => $uniq_id, 
 				'destination_id' => $reciever_id,
 			]);
-
-			if ($message_data->reply_id) {
-				DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
-			}
 
 			return redirect()->route('ng_messages')->with('flash_message', '送信しました。');
 		}

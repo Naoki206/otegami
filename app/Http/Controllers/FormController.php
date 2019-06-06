@@ -101,9 +101,11 @@ class FormController extends Controller
 			$destination_record = DB::table('posts')->where('reply_id', $reply_id)->first();
 			$destination_id = $destination_record->user_id;
 			$posts = DB::table('posts')->where('user_id', $user_id)->where('destination_id', $destination_id)->paginate(10);
-			$received_message = $destination_record->text;
+			$amount_posts = count($posts);
+			$replys = DB::table('posts')->where('user_id', $destination_id)->where('destination_id', $user_id)->paginate(10);
+			$received_message = $destination_record;
 
-			return view('replyForm', compact('posts', 'reply_id', 'received_message'));
+			return view('replyForm', compact('posts', 'reply_id', 'received_message', 'replys', 'amount_posts'));
 		}
 		return view('welcome');
 	}
@@ -179,11 +181,14 @@ class FormController extends Controller
 
 		$reciever_id  = DB::table('users')->where('twitter_id',$destination_id)->first()->id;
 
+		$received_message_id = $received_message_data->id;
+
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
 			'reply_id' => $uniq_id,
 			'destination_id' => $reciever_id,
+			'from_post_id' => $received_message_id,
 		]);
 
 		$post->save();
