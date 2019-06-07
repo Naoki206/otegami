@@ -43,3 +43,4 @@ Route::get('/add_ng_word', 'AdminController@show_add_form')->name('add_ng_word_f
 Route::post('/add_ng', 'AdminController@add_ng_word')->name('add_ng_word');
 Route::get('/ng_messages', 'AdminController@ng_messages')->name('ng_messages');
 Route::get('/ng_messages/{id}', 'AdminController@send_ng_messages')->name('send_ng_messages');
+

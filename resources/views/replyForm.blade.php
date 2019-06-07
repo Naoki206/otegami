@@ -12,9 +12,17 @@
 
 <input type="hidden" name="reply_id" value="{{ $reply_id }}">
 
+@if ($received_message->reply_flg)
+<p>*返信済みです</p>
+@endif
+
 <input type="text" name="text">
 
+@if ($received_message->reply_flg)
+<input type="submit" value="送信" disabled>
+@else
 <input type="submit" value="送信">
+@endif
 </form>
 <h4>このユーザーとのトーク履歴</h4>
 @if ($posts->count())
@@ -27,26 +35,24 @@
 </tr>
 @foreach ($posts as $post)
 <tr>
-	@if ($post->from_post_id)  
-		<?php	$from_post_id = $post->from_post_id; ?>
-		@foreach ($replys as $reply) 
-			@if ($reply->id == $from_post_id) 
-				<td>{{ $reply->text }}</td>
-				<td>{{ $reply->created_at }}</td>
-			@endif 
-		@endforeach 
-	@else
-		<td></td>
-		<td></td>
-	@endif 
+@if ($first_post->user_id == $user_id && $post->from_post_id == NULL)
+<td></td>
+<td></td>
 <td>{{ $post->text }}</td>
 <td>{{ $post->created_at }}</td>
+@elseif ($post->user_id == $user_id)
+<td></td>
+<td></td>
+<td>{{ $post->text }}</td>
+<td>{{ $post->created_at }}</td>
+@else
+<td>{{ $post->text }}</td>
+<td>{{ $post->created_at }}</td>
+<td></td>
+<td></td>
 </tr>
-@endforeach
-@if (!$received_message->reply_flg)
-<td>{{ $received_message->text }}</td>
-<td>{{ $received_message->created_at }}</td>
 @endif
+@endforeach
 </table>
 <br/>
 {{ $posts->links() }}
