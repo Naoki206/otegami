@@ -49,7 +49,8 @@ class FormController extends Controller
 			}
 		}
 
-		$uniq_id = uniqid();
+		$uniq_id1 = uniqid();
+		$uniq_id2 = uniqid();
 
 		$token = DB::table('tokens')->get()->first();
 		$twitter_access_token = $token->twitter_access_token;
@@ -70,7 +71,7 @@ class FormController extends Controller
 						'recipient_id' => $random_user_id  
 					],
 					'message_data' => [
-						'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id]) 
+						'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id1]) 
 					]  
 				]
 			]
@@ -86,8 +87,9 @@ class FormController extends Controller
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
-			'reply_id' => $uniq_id, 
+			'reply_id' => $uniq_id1, 
 			'destination_id' => $reciever_id,
+			'post_id' => $uniq_id2
 		]);
 
 		$post->save();
@@ -99,13 +101,13 @@ class FormController extends Controller
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
 			$destination_record = DB::table('posts')->where('reply_id', $reply_id)->first();
-			$destination_id = $destination_record->user_id;
-			$posts = DB::table('posts')->where('user_id', $user_id)->where('destination_id', $destination_id)->paginate(10);
-			$amount_posts = count($posts);
-			$replys = DB::table('posts')->where('user_id', $destination_id)->where('destination_id', $user_id)->paginate(10);
+			$post_id = $destination_record->post_id;
+			$messages = DB::table('posts')->where('post_id', $post_id);
+			$posts = $messages->paginate(10);
+			$first_post = $messages->first();
 			$received_message = $destination_record;
 
-			return view('replyForm', compact('posts', 'reply_id', 'received_message', 'replys', 'amount_posts'));
+			return view('replyForm', compact('first_post', 'user_id', 'posts', 'reply_id', 'received_message'));
 		}
 		return view('welcome');
 	}
@@ -123,6 +125,9 @@ class FormController extends Controller
 		}
 
 		$received_message_data = DB::table('posts')->where('reply_id', $reply_id)->first();
+
+		$post_id = $received_message_data->post_id;
+
 		$destination_reply_flg = $received_message_data->reply_flg;
 
 		if ($destination_reply_flg == 1) {
@@ -189,6 +194,7 @@ class FormController extends Controller
 			'reply_id' => $uniq_id,
 			'destination_id' => $reciever_id,
 			'from_post_id' => $received_message_id,
+			'post_id' => $post_id,
 		]);
 
 		$post->save();

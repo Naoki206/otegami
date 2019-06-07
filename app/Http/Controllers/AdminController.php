@@ -99,7 +99,7 @@ class AdminController extends Controller
 				$twitter_access_token_secret
 			);
 
-			$uniq_id = uniqid();
+			$uniq_id1 = uniqid();
 
 			$message = $connection->post('direct_messages/events/new', [
 				'event' => [
@@ -109,7 +109,7 @@ class AdminController extends Controller
 							'recipient_id' => $destination_id  
 						],
 						'message_data' => [
-							'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id])
+							'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id1])
 						]  
 					]
 				]
@@ -125,13 +125,15 @@ class AdminController extends Controller
 
 			if ($message_data->reply_id) {
 				$destination_message_id = $destination_data->id;
+				$post_id = $destination_data->post_id;
 
 				$post = Post::create([
 					'text' => $text,
 					'user_id' => $sender_id,
-					'reply_id' => $uniq_id, 
+					'reply_id' => $uniq_id1, 
 					'destination_id' => $reciever_id,
 					'from_post_id' => $destination_message_id,
+					'post_id' => $post_id,
 				]);
 
 				DB::table('posts')->where('reply_id', $reply_id)->update(['reply_flg' => 1]);
@@ -139,11 +141,14 @@ class AdminController extends Controller
 				return redirect()->route('ng_messages')->with('flash_message', '送信しました。');
 			}
 
+			$uniq_id2 = uniqid();
+
 			$post = Post::create([
 				'text' => $text,
 				'user_id' => $sender_id,
-				'reply_id' => $uniq_id, 
+				'reply_id' => $uniq_id1, 
 				'destination_id' => $reciever_id,
+				'post_id' => $uniq_id,
 			]);
 
 			return redirect()->route('ng_messages')->with('flash_message', '送信しました。');
