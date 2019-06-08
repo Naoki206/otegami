@@ -11,6 +11,8 @@
 
 <input type="submit" value="送信">
 </form>
+<a href="{{ route('receivedMessageList') }}">受け取った未返信のメッセージ一覧</a>
+<br/>
 <a href="{{ route('logout') }}" onclick="return confirm('ログアウトします。よろしいですか?');">ログアウト</a>
 <br/>
 <a href="{{ route('confilm_unsubscribe') }}">退会</a>

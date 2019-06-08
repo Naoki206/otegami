@@ -24,6 +24,7 @@
 <input type="submit" value="送信">
 @endif
 </form>
+<a href="{{ route('receivedMessageList') }}">受け取った未返信のメッセージ一覧</a>
 <h4>このユーザーとのトーク履歴</h4>
 @if ($posts->count())
 <table>
