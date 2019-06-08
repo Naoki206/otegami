@@ -28,6 +28,14 @@ class FormController extends Controller
 	}
 
 	function messageSend(Request $request) {
+		$user_id = Auth::user()->id;
+		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+		$now = date("Y-m-d H:i:s");
+		$one_minute_later = (date("Y-m-d H:i:s",strtotime($latest_post_time . "+1 minute")));
+		if ($now < $one_minute_later) {
+			return redirect('/form')->with('flash_message', '少し時間を空けて再度送信し直しててください');
+		}
+
 		$validate_num = config('const.numberOfCharacter');
 		$validated_data = $request->validate([
 			'text' => 'required|max:' . $validate_num,
@@ -113,11 +121,19 @@ class FormController extends Controller
 	}
 
 	function replySend(Request $request) {
+		$reply_id = Input::get('reply_id');
+		$user_id = Auth::user()->id;
+		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+		$now = date("Y-m-d H:i:s");
+		$one_minute_later = (date("Y-m-d H:i:s",strtotime($latest_post_time . "+1 minute")));
+		if ($now < $one_minute_later) {
+			return redirect('/replyForm/' . $reply_id)->with('flash_message', '少し時間を空けて再度送信し直しててください');
+		}
+
 		$validate_num = config('const.numberOfCharacter');
 		$validated_data = $request->validate([
 		'text' => 'required|max:' . $validate_num,
 		]);
-		$reply_id = Input::get('reply_id');
 		$destination_record = DB::table('posts')->where('reply_id', $reply_id)->exists();
 
 		if ($destination_record == false) { 
