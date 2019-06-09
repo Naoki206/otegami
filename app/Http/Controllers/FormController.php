@@ -7,7 +7,6 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-//use Request
 use DB;
 use App\User;
 use App\Post;
@@ -28,7 +27,20 @@ class FormController extends Controller
 	}
 
 	function messageSend(Request $request) {
-		$validate_num = config('const.numberOfCharacter');
+		$user_id = Auth::user()->id;
+		$latest_post = DB::table('posts')->where('user_id', $user_id)->exists();
+
+		if ($latest_post == true) { 
+			$latest_post_time = DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+			$now = date("Y-m-d H:i:s");
+			$minutes = config('const.send_limit_minutes');
+			$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
+			if ($now < $minutes_later) {
+				return redirect('/form')->with('flash_message', '少し時間を空けて再度送信し直しててください');
+			}
+		}
+
+		$validate_num = config('const.number_of_character');
 		$validated_data = $request->validate([
 			'text' => 'required|max:' . $validate_num,
 		]);
@@ -49,7 +61,8 @@ class FormController extends Controller
 			}
 		}
 
-		$uniq_id = uniqid();
+		$uniq_id1 = uniqid();
+		$uniq_id2 = uniqid();
 
 		$token = DB::table('tokens')->get()->first();
 		$twitter_access_token = $token->twitter_access_token;
@@ -70,7 +83,7 @@ class FormController extends Controller
 						'recipient_id' => $random_user_id  
 					],
 					'message_data' => [
-						'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id]) 
+						'text' => $text . ' (返信用URL) : ' . route('Replyform', ['reply_id' => $uniq_id1]) 
 					]  
 				]
 			]
@@ -86,8 +99,9 @@ class FormController extends Controller
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
-			'reply_id' => $uniq_id, 
+			'reply_id' => $uniq_id1, 
 			'destination_id' => $reciever_id,
+			'post_id' => $uniq_id2
 		]);
 
 		$post->save();
@@ -99,21 +113,36 @@ class FormController extends Controller
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
 			$destination_record = DB::table('posts')->where('reply_id', $reply_id)->first();
-			$destination_id = $destination_record->user_id;
-			$posts = DB::table('posts')->where('user_id', $user_id)->where('destination_id', $destination_id)->paginate(10);
-			$received_message = $destination_record->text;
+			$post_id = $destination_record->post_id;
+			$messages = DB::table('posts')->where('post_id', $post_id);
+			$posts = $messages->paginate(10);
+			$first_post = $messages->first();
+			$received_message = $destination_record;
 
-			return view('replyForm', compact('posts', 'reply_id', 'received_message'));
+			return view('replyForm', compact('first_post', 'user_id', 'posts', 'reply_id', 'received_message'));
 		}
 		return view('welcome');
 	}
 
 	function replySend(Request $request) {
-		$validate_num = config('const.numberOfCharacter');
+		$reply_id = Input::get('reply_id');
+		$user_id = Auth::user()->id;
+		$latest_post = DB::table('posts')->where('user_id', $user_id)->exists();
+
+		if ($latest_post == true) { 
+			$latest_post_time = DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+			$now = date("Y-m-d H:i:s");
+			$minutes = config('const.send_limit_minutes');
+			$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
+			if ($now < $minutes_later) {
+				return redirect('/replyForm/' . $reply_id)->with('flash_message', '少し時間を空けて再度送信し直しててください');
+			}
+		}
+
+		$validate_num = config('const.number_of_character');
 		$validated_data = $request->validate([
 		'text' => 'required|max:' . $validate_num,
 		]);
-		$reply_id = Input::get('reply_id');
 		$destination_record = DB::table('posts')->where('reply_id', $reply_id)->exists();
 
 		if ($destination_record == false) { 
@@ -121,6 +150,9 @@ class FormController extends Controller
 		}
 
 		$received_message_data = DB::table('posts')->where('reply_id', $reply_id)->first();
+
+		$post_id = $received_message_data->post_id;
+
 		$destination_reply_flg = $received_message_data->reply_flg;
 
 		if ($destination_reply_flg == 1) {
@@ -177,13 +209,17 @@ class FormController extends Controller
 			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
-		$reciever_id  = DB::table('users')->where('twitter_id',$destination_id)->first()->id;
+		$reciever_id  = DB::table('users')->where('twitter_id', $destination_id)->first()->id;
+
+		$received_message_id = $received_message_data->id;
 
 		$post = Post::create([
 			'text' => $text,
 			'user_id' => $user_id,
 			'reply_id' => $uniq_id,
 			'destination_id' => $reciever_id,
+			'from_post_id' => $received_message_id,
+			'post_id' => $post_id,
 		]);
 
 		$post->save();
