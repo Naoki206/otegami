@@ -7,7 +7,6 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-//use Request
 use DB;
 use App\User;
 use App\Post;
@@ -31,12 +30,13 @@ class FormController extends Controller
 		$user_id = Auth::user()->id;
 		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
 		$now = date("Y-m-d H:i:s");
-		$one_minute_later = (date("Y-m-d H:i:s",strtotime($latest_post_time . "+1 minute")));
-		if ($now < $one_minute_later) {
+		$minutes = config('const.send_limit_minutes');
+		$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
+		if ($now < $minutes_later) {
 			return redirect('/form')->with('flash_message', '少し時間を空けて再度送信し直しててください');
 		}
 
-		$validate_num = config('const.numberOfCharacter');
+		$validate_num = config('const.number_of_character');
 		$validated_data = $request->validate([
 			'text' => 'required|max:' . $validate_num,
 		]);
@@ -125,12 +125,13 @@ class FormController extends Controller
 		$user_id = Auth::user()->id;
 		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
 		$now = date("Y-m-d H:i:s");
-		$one_minute_later = (date("Y-m-d H:i:s",strtotime($latest_post_time . "+1 minute")));
-		if ($now < $one_minute_later) {
+		$minutes = config('const.send_limit_minutes');
+		$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . 'minute')));
+		if ($now < $minutes_later) {
 			return redirect('/replyForm/' . $reply_id)->with('flash_message', '少し時間を空けて再度送信し直しててください');
 		}
 
-		$validate_num = config('const.numberOfCharacter');
+		$validate_num = config('const.number_of_character');
 		$validated_data = $request->validate([
 		'text' => 'required|max:' . $validate_num,
 		]);
@@ -200,7 +201,7 @@ class FormController extends Controller
 			return redirect('/form')->with('flash_message', '送信に失敗しました。');
 		};
 
-		$reciever_id  = DB::table('users')->where('twitter_id',$destination_id)->first()->id;
+		$reciever_id  = DB::table('users')->where('twitter_id', $destination_id)->first()->id;
 
 		$received_message_id = $received_message_data->id;
 
