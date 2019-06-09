@@ -32,7 +32,7 @@ class UserController extends Controller
 	function receivedMessageList() {
 		if (Auth::check()) {
 			$user_id = Auth::user()->id;
-			$received_messages = DB::table('posts')->where('destination_id', $user_id)->paginate(10);
+			$received_messages = DB::table('posts')->where('destination_id', $user_id)->where('reply_flg', NULL)->paginate(10);
 			return view('user.received_messages', compact('received_messages'));
 		}
 
