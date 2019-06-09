@@ -28,12 +28,16 @@ class FormController extends Controller
 
 	function messageSend(Request $request) {
 		$user_id = Auth::user()->id;
-		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
-		$now = date("Y-m-d H:i:s");
-		$minutes = config('const.send_limit_minutes');
-		$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
-		if ($now < $minutes_later) {
-			return redirect('/form')->with('flash_message', '少し時間を空けて再度送信し直しててください');
+		$latest_post = DB::table('posts')->where('user_id', $user_id)->exists();
+
+		if ($latest_post == true) { 
+			$latest_post_time = DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+			$now = date("Y-m-d H:i:s");
+			$minutes = config('const.send_limit_minutes');
+			$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
+			if ($now < $minutes_later) {
+				return redirect('/form')->with('flash_message', '少し時間を空けて再度送信し直しててください');
+			}
 		}
 
 		$validate_num = config('const.number_of_character');
@@ -123,12 +127,16 @@ class FormController extends Controller
 	function replySend(Request $request) {
 		$reply_id = Input::get('reply_id');
 		$user_id = Auth::user()->id;
-		$latest_post_time =  DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
-		$now = date("Y-m-d H:i:s");
-		$minutes = config('const.send_limit_minutes');
-		$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . 'minute')));
-		if ($now < $minutes_later) {
-			return redirect('/replyForm/' . $reply_id)->with('flash_message', '少し時間を空けて再度送信し直しててください');
+		$latest_post = DB::table('posts')->where('user_id', $user_id)->exists();
+
+		if ($latest_post == true) { 
+			$latest_post_time = DB::table('posts')->where('user_id', $user_id)->orderBy('created_at', 'desc')->first()->created_at;
+			$now = date("Y-m-d H:i:s");
+			$minutes = config('const.send_limit_minutes');
+			$minutes_later = (date("Y-m-d H:i:s", strtotime($latest_post_time . '+' . $minutes . ' minute')));
+			if ($now < $minutes_later) {
+				return redirect('/replyForm/' . $reply_id)->with('flash_message', '少し時間を空けて再度送信し直しててください');
+			}
 		}
 
 		$validate_num = config('const.number_of_character');
